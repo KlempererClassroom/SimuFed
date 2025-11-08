@@ -26,7 +26,17 @@ def main():
         df.to_csv(args.outdir / f"partition_{i+1}.csv", index=False)
         print(f"Generated partition_{i+1}.csv (mean≈{mu}, std≈{sigma})")
 
-    print(f"\n✅  Created {args.clients} CSV partitions in {args.outdir}/")
+    print(f"\n>>>  Created {args.clients} CSV partitions in {args.outdir}/")
 
 if __name__ == "__main__":
     main()
+
+'''
+Generates one CSV per client.
+
+Each CSV has a column "value" with numeric data.
+
+Slight variations in mean/variance ensure global aggregation isn’t trivial.
+
+Reproducible across runs because of --seed.
+'''
