@@ -14,7 +14,7 @@ class ClientConfig:
     column: str = "value"
     bins: int = 10
     hist_range: tuple[float, float] | None = None
-    faults: FaultConfig = FaultConfig()
+    faults: FaultConfig = field(default_factory=FaultConfig)
 
 def worker(cfg: ClientConfig, out_q: Queue):
     """
