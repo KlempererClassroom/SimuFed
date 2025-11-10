@@ -33,7 +33,7 @@ def main():
         partition.to_csv(args.outdir / f"partition_{i+1}.csv", index=False)
         client_mean = partition["value"].mean()
         client_std = partition["value"].std()
-        print(f"Generated partition_{i+1}.csv (rows={len(partition)}) (mean={client_mean:.2f}, std={client_std:.2f})")
+        print(f"Generated partition_{i+1}.csv (rows={len(partition)}) (mean {client_mean:.2f}, std {client_std:.2f})")
 
     print(f">>> Created {args.clients} CSV partitions in {args.outdir}/")
     print(f">>> Federated Average should approximate global stats: mean=0, std={args.clients:.2f}")
