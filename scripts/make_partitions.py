@@ -17,16 +17,26 @@ def main():
     rng = np.random.default_rng(args.seed)
     args.outdir.mkdir(parents=True, exist_ok=True)
 
-    for i in range(args.clients):
-        # Give each client a slightly different distribution
-        mu = 10 + i * 0.5
-        sigma = 2 + (i % 2) * 0.5
-        x = rng.normal(loc=mu, scale=sigma, size=args.rows)
-        df = pd.DataFrame({"value": x})
-        df.to_csv(args.outdir / f"partition_{i+1}.csv", index=False)
-        print(f"Generated partition_{i+1}.csv (mean≈{mu}, std≈{sigma})")
+    # Generate a single dataset with n elements
+    n = args.clients * args.rows
+    x = rng.normal(loc=0, scale=args.clients, size=n)
+    x = np.sort(x)
+    df = pd.DataFrame({"value": x})
 
-    print(f"\n>>>  Created {args.clients} CSV partitions in {args.outdir}/")
+    # Pathologically partition the dataset into consecutive chunks
+    # Each client gets a chunk with slightly different statistics
+    # We will show that aggregate of the clients approximates the global stats: mean=0, std=args.clients
+    for i in range(args.clients):
+        start_idx = i * args.rows
+        end_idx = start_idx + args.rows
+        partition = df.iloc[start_idx:end_idx].sample(frac=1, random_state=args.seed).reset_index(drop=True)
+        partition.to_csv(args.outdir / f"partition_{i+1}.csv", index=False)
+        client_mean = partition["value"].mean()
+        client_std = partition["value"].std()
+        print(f"Generated partition_{i+1}.csv (rows={len(partition)}) (mean={client_mean:.2f}, std={client_std:.2f})")
+
+    print(f">>> Created {args.clients} CSV partitions in {args.outdir}/")
+    print(f">>> Federated Average should approximate global stats: mean=0, std={args.clients:.2f}")
 
 if __name__ == "__main__":
     main()
