@@ -5,7 +5,7 @@ It demonstrates how distributed clients can compute local statistics and send ag
 
 ---
 
-## 📘 Features
+## Features
 
 - **Synchronous federated aggregation** (round-based)
 - **Client-level statistics**: mean, variance, and histogram
@@ -15,7 +15,7 @@ It demonstrates how distributed clients can compute local statistics and send ag
 
 ---
 
-## 🧱 Project Structure
+## Project Structure
 
 ```
 SimuFed/
@@ -39,9 +39,9 @@ README.md
 
 ---
 
-## ⚙️ Run Instructions
+## Run Instructions
 
-### 1️⃣ Setup Virtual Environment and Install Dependencies
+###Setup Virtual Environment and Install Dependencies
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -50,47 +50,67 @@ pip install -r requirements.txt
 
 ---
 
-### 2️⃣ Generate Synthetic Datasets
+### Generate Synthetic Datasets
 ```bash
-python scripts/make_partitions.py --outdir datasets --clients 3 --rows 1000
+python scripts/make_partitions.py --outdir datasets --clients 5 --rows 100
 ```
 
 #### Example Output
+It can be seen that each partition has wildly different local statistics. Federated computation rests on the assumption that local statistics approximate the global distribution when aggregated. We will demonstrate this in the next section.
 ```
-Generated partition_1.csv (mean≈10.0, std≈2.0)
-Generated partition_2.csv (mean≈10.5, std≈2.5)
-Generated partition_3.csv (mean≈11.0, std≈2.0)
-✅ Created 3 CSV partitions in datasets/
+Generated partition_1.csv (rows=100) (mean -6.78, std 2.02)
+Generated partition_2.csv (rows=100) (mean -2.58, std 0.90)
+Generated partition_3.csv (rows=100) (mean -0.01, std 0.76)
+Generated partition_4.csv (rows=100) (mean 2.33, std 0.76)
+Generated partition_5.csv (rows=100) (mean 6.71, std 2.44)
+>>> Created 5 CSV partitions in datasets/
+>>> Federated Average should approximate global stats: mean=0, std=5.00
 ```
 
 ---
 
-### 3️⃣ Run the Synchronous Federated Demo
+### Run the Synchronous Federated Demo
+
+Consider the case where no clients drop out and there is some network delay. This simulates a stable network with some latency. Our aggregated statistics should closely approximate the global statistics.
 ```bash
-python run_sync_demo.py --clients 3 --timeout 5 --drop-prob 0.2 --max-delay 3
+$> python run_sync_demo.py --clients 5 --timeout 5 --drop-prob 0.0 --max-delay 3
+... (logs showing client delays) ...
+=== Federated Round Complete ===
+Received: 5 / Dropped: 0
+Duration: 3.023s
+Global n=500, mean=-0.0656, std=4.7949
 ```
 
-#### Expected Output
+Now consider a more unstable network where some clients drop out and there is variable delay. The aggregated statistics may deviate more from the global statistics due to missing data.
+```bash
+$> python run_sync_demo.py --clients 5 --timeout 5 --drop-prob 0.5 --max-delay 3
+... (logs showing client delays) ...
+=== Federated Round Complete ===
+Received: 3 / Dropped: 2
+Duration: 5.038s
+Global n=300, mean=-2.3439, std=3.9562
 ```
-=== Round Complete ===
-Received: 3 / Dropped: 0
-Duration: 1.84s
-Global n=3000  Global mean=10.73  var=4.11
-[Client 1] n=1000  mean=10.00  var=3.97
-[Client 2] n=1000  mean=10.51  var=4.30
-[Client 3] n=1000  mean=11.68  var=4.06
+
+If majority clients drop out, the aggregated statistics may be significantly off from the global statistics.
+```bash
+$> python run_sync_demo.py --clients 5 --timeout 5 --drop-prob 0.8 --max-delay 3
+... (logs showing client delays) ...
+=== Federated Round Complete ===
+Received: 2 / Dropped: 3
+Duration: 5.071s
+Global n=200, mean=-0.1272, std=2.5905
 ```
 
 ---
 
-### 💡 Notes
+### Notes
 - `--drop-prob` controls the fraction of clients that may drop out each round.
 - `--max-delay` simulates random network latency (in seconds).
 - Adjust `--timeout` to control how long the Coordinator waits for missing clients.
 
 ---
 
-## 🧭 Milestone Scope
+## Milestone Scope
 
 - Fully functional **synchronous coordinator–client** pipeline  
 - Fault simulation (delay & dropout)  
@@ -99,7 +119,7 @@ Global n=3000  Global mean=10.73  var=4.11
 
 ---
 
-## 🧪 Example Experiments
+## Example Experiments
 
 You can explore different failure rates and delays:
 
