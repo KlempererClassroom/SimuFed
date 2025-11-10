@@ -39,9 +39,8 @@ README.md
 
 ---
 
-## Run Instructions
-
-###Setup Virtual Environment and Install Dependencies
+### Getting Started
+Setup a virtual environment and install dependencies.
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -51,13 +50,13 @@ pip install -r requirements.txt
 ---
 
 ### Generate Synthetic Datasets
+This creates 100 rows of disjoint distribution, scalar valued dataset for each client.
 ```bash
 python scripts/make_partitions.py --outdir datasets --clients 5 --rows 100
 ```
 
-#### Example Output
 It can be seen that each partition has wildly different local statistics. Federated computation rests on the assumption that local statistics approximate the global distribution when aggregated. We will demonstrate this in the next section.
-```
+```log
 Generated partition_1.csv (rows=100) (mean -6.78, std 2.02)
 Generated partition_2.csv (rows=100) (mean -2.58, std 0.90)
 Generated partition_3.csv (rows=100) (mean -0.01, std 0.76)
