@@ -51,10 +51,8 @@ def main():
     print(
         f"Global n={result.aggregated['n']}, "
         f"mean={result.aggregated['mean']:.4f}, "
-        f"var={result.aggregated['var']:.4f}"
+        f"std={result.aggregated['var']**0.5:.4f}"
     )
-    for s in result.summaries:
-        print(f"[Client {s.client_id}] n={s.n}, mean={s.mean:.4f}, var={s.var:.4f}")
 
 if __name__ == "__main__":
     main()
