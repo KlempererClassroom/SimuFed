@@ -6,6 +6,7 @@ from SimuFed.coordinator import Coordinator
 from SimuFed.client import ClientConfig
 from SimuFed.fault_simulator import FaultConfig
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Run a synchronous federated aggregation demo using SimuFed."
@@ -27,7 +28,7 @@ def main():
             )
 
     # create client configurations
-    clients = []
+    clients: list[ClientConfig] = []
     for i, f in enumerate(files, start=1):
         clients.append(
             ClientConfig(
@@ -36,7 +37,10 @@ def main():
                 column="value",
                 bins=args.bins,
                 hist_range=None,
-                faults=FaultConfig(drop_prob=args.drop_prob, max_delay_s=args.max_delay),
+                faults=FaultConfig(
+                    drop_prob=args.drop_prob,
+                    max_delay_s=args.max_delay,
+                ),
             )
         )
 
@@ -44,26 +48,51 @@ def main():
     coord = Coordinator(timeout_s=args.timeout)
     result = coord.run_round(clients)
 
-    # print summary
+    received_count = len(result.summaries)
+    dropped_count = result.dropped
+    duration = result.duration_s
+
+    if result.aggregated:
+        global_n = result.aggregated["n"]
+        global_mean = result.aggregated["mean"]
+        global_var = result.aggregated["var"]
+        global_std = global_var ** 0.5
+    else:
+        global_n = 0
+        global_mean = float("nan")
+        global_var = float("nan")
+        global_std = float("nan")
+
+     # human-readable summary
     print("\n=== Federated Round Complete ===")
-    print(f"Received: {len(result.summaries)} / Dropped: {result.dropped}")
-    print(f"Duration: {result.duration_s:.3f}s")
+    print(f"Received: {received_count} / Dropped: {dropped_count}")
+    print(f"Duration: {duration:.3f}s")
+    if global_n > 0:
+        print(
+            f"Global n={global_n}, "
+            f"mean={global_mean:.4f}, "
+            f"std={global_std:.4f}"
+        )
+    else:
+        print("No summaries received; no aggregate computed.")
+
+    # safe strings for STATS line
+    gm_str = f"{global_mean:.4f}" if global_n > 0 else "nan"
+    gv_str = f"{global_var:.4f}" if global_n > 0 else "nan"
+
+    # Machine-readable stats line for experiments
     print(
-        f"Global n={result.aggregated['n']}, "
-        f"mean={result.aggregated['mean']:.4f}, "
-        f"std={result.aggregated['var']**0.5:.4f}"
+        "STATS,"
+        f"mode=sync,"
+        f"clients_expected={args.clients},"
+        f"received={received_count},"
+        f"dropped={dropped_count},"
+        f"duration={duration:.4f},"
+        f"global_n={global_n},"
+        f"global_mean={gm_str},"
+        f"global_var={gv_str}"
     )
+
 
 if __name__ == "__main__":
     main()
-
-
-'''
-Uses your ClientConfig and FaultConfig to spin up N clients.
-
-Each client reads its CSV and either sends or drops an update.
-
-The Coordinator waits for responses (up to --timeout) and aggregates results.
-
-The printed summary makes it easy to demonstrate functionality during your presentation.
-'''

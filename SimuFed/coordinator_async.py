@@ -107,8 +107,10 @@ class AsyncCoordinator:
         print(f"Received: {len(received)} / Dropped: {dropped}")
         print(f"Duration: {duration:.3f}s")
         if final_agg:
-            print(f"Final global n={final_agg['n']}, "
-                  f"mean={final_agg['mean']:.4f}, var={final_agg['var']:.4f}")
+            print(
+                f"Final global n={final_agg['n']}, "
+                f"mean={final_agg['mean']:.4f}, var={final_agg['var']:.4f}"
+            )
         else:
             print("No summaries received; no aggregate computed.")
 
@@ -118,3 +120,4 @@ class AsyncCoordinator:
             duration_s=duration,
             aggregated=final_agg,
         )
+

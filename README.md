@@ -129,3 +129,29 @@ for dp in 0.0 0.2 0.5; do
   python run_sync_demo.py --clients 3 --timeout 3 --drop-prob $dp --max-delay 1
 done
 ```
+
+---
+
+## Asynchronous Federated Demo
+
+The synchronous demo waits until the round ends (timeout hit or all clients responded) and then aggregates all summaries at once.
+
+To contrast that, we also provide an **asynchronous-style coordinator** that:
+- launches all clients,
+- merges each client’s summary into the global aggregate **as soon as it arrives**, and
+- stops when either:
+  - all clients have responded, or
+  - a global timeout is reached, or
+  - a short **grace period** has passed since the last update.
+
+This simulates a common design in federated systems where the server does not strictly block on every slow or failed client.
+
+### Run the Asynchronous Demo
+
+```bash
+python run_async_demo.py \
+  --clients 3 \
+  --timeout 5 \
+  --drop-prob 0.3 \
+  --max-delay 3 \
+  --grace 1

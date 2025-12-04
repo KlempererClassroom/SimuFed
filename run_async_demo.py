@@ -59,7 +59,34 @@ def main() -> None:
     )
 
     coord = AsyncCoordinator(timeout_s=args.timeout, grace_after_last=args.grace)
-    coord.run_round(configs)
+    result = coord.run_round(configs)
+
+    # Extract global stats safely
+    if result.aggregated:
+        global_n = result.aggregated["n"]
+        global_mean = result.aggregated["mean"]
+        global_var = result.aggregated["var"]
+    else:
+        global_n = 0
+        global_mean = float("nan")
+        global_var = float("nan")
+
+    gm_str = f"{global_mean:.4f}" if global_n > 0 else "nan"
+    gv_str = f"{global_var:.4f}" if global_n > 0 else "nan"
+
+    # Machine-readable stats line (async)
+    print(
+        "STATS,"
+        f"mode=async,"
+        f"clients_expected={args.clients},"
+        f"received={result.received},"
+        f"dropped={result.dropped},"
+        f"duration={result.duration_s:.4f},"
+        f"global_n={global_n},"
+        f"global_mean={gm_str},"
+        f"global_var={gv_str}"
+    )
+
 
 
 if __name__ == "__main__":
