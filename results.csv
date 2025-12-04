@@ -1,0 +1,7 @@
+mode,drop_prob,clients_expected,received,dropped,duration,global_n,global_mean,global_var
+sync,0.0,5,5,0,2.7134,5000,-0.0994,24.9677
+sync,0.5,5,1,4,5.0173,1000,2.4938,0.6362
+sync,0.8,5,0,5,5.0581,0,nan,nan
+async,0.0,5,5,0,2.5894,5000,-0.0994,24.9677
+async,0.5,5,1,4,2.5975,1000,2.4938,0.6362
+async,0.8,5,1,4,1.361,1000,-2.721,0.7464
