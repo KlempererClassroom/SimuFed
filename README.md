@@ -1,6 +1,6 @@
-# SimuFed — A Lightweight Federated Data Processing Framework
+# SimuFed — A Lightweight Federated Data Analytics Framework
 
-SimuFed is a minimal simulation framework for **federated data processing**.  
+SimuFed is a tiny simulation library for **federated data analytics**.  
 It models how distributed clients compute local statistics (mean, variance, histogram) and send aggregated summaries to a central coordinator, with **simulated latency, delays, and client dropouts**.
 
 SimuFed supports both:
@@ -10,20 +10,31 @@ SimuFed supports both:
 
 This makes it ideal for learning and demonstrating practical distributed-systems concepts at small scale.
 
----
+## Table of Contents
+- [Features](#features)
+- [Project Structure](#project-structure)
+- [Installation](#1-installation)
+- [Generate Synthetic Datasets](#2-generate-synthetic-datasets)
+- [Synchronous Federated Demo](#3-synchronous-federated-demo)
+- [Asynchronous Federated Demo](#4-asynchronous-federated-demo)
+- [Running Full Experiments (Used for Plots)](#5-running-full-experiments-used-for-plots)
+- [Plotting the Results](#6-plotting-the-results)
+- [Results Overview](#7-results-overview-what-the-plots-show)
+  - [Runtime vs Drop Probability](#71-runtime-vs-drop-probability)
+  - [Client Success Rate vs Drop Probability](#72-client-success-rate-vs-drop-probability)
+  - [Accuracy Degradation Under Dropout](#73-accuracy-degradation-under-dropout)
+- [Notes and Tuning Knobs](#8-notes-and-tuning-knobs)
+- [Milestone Scope](#9-milestone-scope-what-this-repository-demonstrates)
+- [Reproducibility Checklist](#10-reproducibility-checklist)
+- [License / Course Context](#11-license--course-context)
+
 
 ## Features
 
-- **Local client statistics**: mean, variance, histogram  
-- **Synchronous vs Asynchronous** aggregation modes  
-- **Fault simulation**:
-  - random network delay  
-  - random client dropout  
-- **Synthetic dataset generator**
-- **Experiment pipeline + plotting scripts**
-- Designed to be small, readable, and fully reproducible
+SimuFed allows simulating local clients that compute and share compact summaries (mean, variance, histogram) via both synchronous (round‑based) and asynchronous (streaming) aggregation methods. It also includes a simple fault simulator to model random network delays and client dropouts, plus a synthetic dataset generator and an experiment pipeline with plotting scripts for automated sweeps and result visualization.
 
----
+The codebase is designed to be intentionally small and readable: modular utilities make it easy to inspect, extend, and reproduce experiments end‑to‑end, so it’s well suited for teaching, demoing distributed aggregation concepts, and benchmarking under simulated faults.
+
 
 ## Project Structure
 
@@ -49,7 +60,6 @@ requirements.txt
 README.md
 ```
 
----
 
 ## 1. Installation
 
@@ -57,7 +67,6 @@ README.md
     source .venv/bin/activate
     pip install -r requirements.txt
 
----
 
 ## 2. Generate Synthetic Datasets
 
@@ -82,7 +91,6 @@ Otherwise you will see:
 
     FileNotFoundError: Missing dataset file: datasets/partition_4.csv (generate with scripts/make_partitions.py)
 
----
 
 ## 3. Synchronous Federated Demo
 
@@ -110,7 +118,6 @@ Run:
 
 The `STATS,...` line at the end is machine-readable and is used by the experiment script.
 
----
 
 ## 4. Asynchronous Federated Demo
 
@@ -150,7 +157,6 @@ Run:
 
 Here again, the final `STATS,...` line is used for automated experiments.
 
----
 
 ## 5. Running Full Experiments (Used for Plots)
 
@@ -178,7 +184,6 @@ Example of generated CSV:
 
 Each row is one run with a particular drop probability and mode.
 
----
 
 ## 6. Plotting the Results
 
@@ -192,11 +197,8 @@ This will read `results.csv` and generate:
 - `success_vs_drop.png` — **Fraction of clients received** vs drop probability.  
 - `accuracy_vs_drop.png` — **Error in global mean** vs drop probability.  
 
-You can embed these PNGs directly into your final report or slides.
 
----
-
-## 7. Results Overview (What the Plots Show)
+## 7. Results
 
 ### 7.1 Runtime vs Drop Probability
 
@@ -205,7 +207,7 @@ You can embed these PNGs directly into your final report or slides.
   - when all clients respond, it finishes close to the “natural” completion time;  
   - when many drop out, it stops quickly once the grace period elapses.
 
-File: `runtime_vs_drop.png`
+<img src="figures/plot_duration_vs_drop.png" align="center">
 
 ---
 
@@ -215,7 +217,7 @@ File: `runtime_vs_drop.png`
 - At high drop probabilities, the synchronous coordinator can receive **zero** updates (all dropped or late), producing `NaN` global statistics.  
 - The asynchronous coordinator often still obtains at least one update because it is not blocked on a hard barrier.
 
-File: `success_vs_drop.png`
+<img src="figures/plot_success_vs_drop.png" align="center">
 
 ---
 
@@ -227,9 +229,8 @@ We compare the global mean from SimuFed to the “true” centralized mean (appr
 - With **moderate dropout**, global mean deviates but remains reasonable if at least one client per mode responds.  
 - With **extreme dropout**, synchronous may get zero summaries and cannot compute a valid mean/variance, while asynchronous still returns a (biased but defined) estimate from the surviving clients.
 
-File: `accuracy_vs_drop.png`
+<img src="figures/plot_mean_error_vs_drop.png" align="center">
 
----
 
 ## 8. Notes and Tuning Knobs
 
@@ -245,7 +246,6 @@ File: `accuracy_vs_drop.png`
 - `--grace` (async only)  
   Extra time to keep listening **after** the last update arrives. Useful to model “soft” waiting for stragglers without blocking for the full timeout.
 
----
 
 ## 9. Milestone Scope (What This Repository Demonstrates)
 
@@ -259,7 +259,6 @@ File: `accuracy_vs_drop.png`
   - generate plots via `plots/plot_results.py`  
 - Clear, modular Python code suitable for extension
 
----
 
 ## 10. Reproducibility Checklist
 
@@ -285,7 +284,6 @@ File: `accuracy_vs_drop.png`
 
 If you follow these steps, you should reproduce the same behavior and graphs shown in the report.
 
----
 
 ## 11. License / Course Context
 
