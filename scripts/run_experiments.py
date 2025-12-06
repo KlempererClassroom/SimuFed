@@ -8,14 +8,22 @@ from pathlib import Path
 
 
 # Each command string contains the drop probability as: --drop-prob X
-COMMANDS = [
-    "run_sync_demo.py --clients 5 --timeout 5 --drop-prob 0.0 --max-delay 3",
-    "run_sync_demo.py --clients 5 --timeout 5 --drop-prob 0.5 --max-delay 3",
-    "run_sync_demo.py --clients 5 --timeout 5 --drop-prob 0.8 --max-delay 3",
-    "run_async_demo.py --clients 5 --timeout 5 --drop-prob 0.0 --max-delay 3 --grace 1",
-    "run_async_demo.py --clients 5 --timeout 5 --drop-prob 0.5 --max-delay 3 --grace 1",
-    "run_async_demo.py --clients 5 --timeout 5 --drop-prob 0.8 --max-delay 3 --grace 1",
-]
+COMMANDS = []
+clients = 50
+timeout = 2
+max_delay = 4
+grace = 2
+
+# Linearly spaced drop probabilities
+probs = [round(i * 1.0 / 20, 2) for i in range(20)]
+
+for p in probs:
+    COMMANDS.append(
+        f"run_sync_demo.py --clients {clients} --timeout {timeout} --drop-prob {p} --max-delay {max_delay}"
+    )
+    COMMANDS.append(
+        f"run_async_demo.py --clients {clients} --timeout {timeout} --drop-prob {p} --max-delay {max_delay} --grace {grace}"
+    )
 
 PYTHON = "python"  # or ".venv/bin/python3" if you prefer absolute
 

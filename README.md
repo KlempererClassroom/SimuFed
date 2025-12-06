@@ -270,17 +270,18 @@ We compare the global mean from SimuFed to the “true” centralized mean (appr
        python scripts/make_partitions.py --outdir datasets --clients 5 --rows 1000
 
 5. Run demos:
+    ```bash
+    # Run custom experiments
+    python run_sync_demo.py --clients 5 --timeout 5 --drop-prob 0.2 --max-delay 3
+    python run_async_demo.py --clients 5 --timeout 5 --drop-prob 0.3 --max-delay 3 --grace 1
 
-       python run_sync_demo.py --clients 5 --timeout 5 --drop-prob 0.2 --max-delay 3
-       python run_async_demo.py --clients 5 --timeout 5 --drop-prob 0.3 --max-delay 3 --grace 1
+    # Run all experiments
+    python scripts/run_all_experiments.py
+    ```
 
-6. Run full experiments:
+6. Generate plots:
 
-       python run_all_experiments.py
-
-7. Generate plots:
-
-       python plots/plot_results.py
+       python plot_results.py
 
 If you follow these steps, you should reproduce the same behavior and graphs shown in the report.
 
